@@ -5,27 +5,27 @@ node {
      sh "git rev-parse --short HEAD > .git/commit-id"
      commit_id = readFile('.git/commit-id').trim()
    }
-   stage('test') {
-     def myTestContainer = docker.image('node:4.6')
+   stage('test') {.  // stage  test  
+     def myTestContainer = docker.image('node:4.6')  // defini container avec image node js 4.6. 
      myTestContainer.pull()
-     myTestContainer.inside {
+     myTestContainer.inside {  // exeute commande ds le container.  install nodejs. 
        sh 'npm install --only=dev'
-       sh 'npm test'
+       sh 'npm test'     // execute la partie test specifi& fichier package.json 
      }
    }
    stage('test with a DB') {
-     def mysql = docker.image('mysql').run("-e MYSQL_ALLOW_EMPTY_PASSWORD=yes") 
-     def myTestContainer = docker.image('node:4.6')
-     myTestContainer.pull()
+     def mysql = docker.image('mysql').run("-e MYSQL_ALLOW_EMPTY_PASSWORD=yes")   // new container avec image mysql et execute  
+     def myTestContainer = docker.image('node:4.6') //  image pour nodejs. 
+     myTestContainer.pull()   // descend image nodejs
      myTestContainer.inside("--link ${mysql.id}:mysql") { // using linking, mysql will be available at host: mysql, port: 3306
           sh 'npm install --only=dev' 
           sh 'npm test'                     
-     }                                   
+     }   // qd test fait  container destroyed                                
      mysql.stop()
    }                                     
    stage('docker build/push') {            
      docker.withRegistry('https://index.docker.io/v2/', 'dockerhub') {
-       def app = docker.build("wardviaene/docker-nodejs-demo:${commit_id}", '.').push()
+       def app = docker.build("ctrau/demo1:${commit_id}", '.').push()    // cree image  a partir dockerFile dans le path et push vers docker hub. 
      }                                     
    }                                       
 }                                          
